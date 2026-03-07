@@ -30,5 +30,8 @@ export default defineConfig({
         changeOrigin: true
       }
     }
+  },
+  test: {
+    exclude: ['e2e/**', 'node_modules/**', 'dist/**']
   }
 })

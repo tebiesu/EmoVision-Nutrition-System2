@@ -23,6 +23,9 @@ backend/.mvn/
 frontend/node_modules/
 frontend/dist/
 frontend/.vite/
+frontend/test-results/
+frontend/playwright-report/
+frontend/tsconfig.tsbuildinfo
 
 # Uploads
 uploads/
@@ -35,4 +38,4 @@ uploads/
 2026-*.txt
 
 # Local docs / secrets
-ÕæÊµÅäÖÃ.txt
+çœŸå®é…ç½®.txt

@@ -1,0 +1,29 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:health_assistant;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  flyway:
+    enabled: false
+  data:
+    redis:
+      repositories:
+        enabled: false
+      host: 127.0.0.1
+      port: 6379
+  sql:
+    init:
+      mode: always
+  h2:
+    console:
+      enabled: true
+
+logging:
+  level:
+    root: info
+    com.project.healthassistant: info
+
+app:
+  upload:
+    base-dir: uploads-test
