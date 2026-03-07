@@ -36,3 +36,7 @@ app:
   jwt:
     secret: ${JWT_SECRET:change-me-to-a-very-long-secret-key-for-jwt-token}
     expiration-seconds: ${JWT_EXPIRATION_SECONDS:7200}
+  upload:
+    max-size-bytes: ${UPLOAD_MAX_SIZE_BYTES:5242880}
+    allowed-types: image/jpeg,image/png,image/webp
+    base-dir: ${UPLOAD_BASE_DIR:uploads}

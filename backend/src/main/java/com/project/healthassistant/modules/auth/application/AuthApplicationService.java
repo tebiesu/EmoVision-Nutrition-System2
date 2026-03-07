@@ -8,12 +8,15 @@ import com.project.healthassistant.modules.auth.dto.LoginRequest;
 import com.project.healthassistant.modules.auth.dto.LoginResponse;
 import com.project.healthassistant.modules.auth.dto.RegisterRequest;
 import com.project.healthassistant.modules.auth.infrastructure.UserAccountMapper;
+import com.project.healthassistant.modules.auth.service.TokenBlacklistService;
 import com.project.healthassistant.security.jwt.JwtTokenProvider;
+import io.jsonwebtoken.Claims;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Service
 public class AuthApplicationService {
@@ -22,15 +25,18 @@ public class AuthApplicationService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtProperties jwtProperties;
+    private final TokenBlacklistService tokenBlacklistService;
 
     public AuthApplicationService(UserAccountMapper userAccountMapper,
                                   PasswordEncoder passwordEncoder,
                                   JwtTokenProvider jwtTokenProvider,
-                                  JwtProperties jwtProperties) {
+                                  JwtProperties jwtProperties,
+                                  TokenBlacklistService tokenBlacklistService) {
         this.userAccountMapper = userAccountMapper;
         this.passwordEncoder = passwordEncoder;
         this.jwtTokenProvider = jwtTokenProvider;
         this.jwtProperties = jwtProperties;
+        this.tokenBlacklistService = tokenBlacklistService;
     }
 
     @Transactional
@@ -73,5 +79,27 @@ public class AuthApplicationService {
                         .roleCode(user.getRoleCode())
                         .build())
                 .build();
+    }
+
+    public LoginResponse.UserInfo currentUser(Long userId) {
+        UserAccount user = userAccountMapper.findActiveById(userId);
+        if (user == null) {
+            throw new BusinessException(ResultCode.USER_NOT_FOUND);
+        }
+        return LoginResponse.UserInfo.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .nickname(user.getNickname())
+                .roleCode(user.getRoleCode())
+                .build();
+    }
+
+    public void logout(Long userId, String token) {
+        Claims claims = jwtTokenProvider.parseClaims(token);
+        tokenBlacklistService.blacklist(
+                claims.getId(),
+                userId,
+                LocalDateTime.ofInstant(claims.getExpiration().toInstant(), ZoneId.systemDefault())
+        );
     }
 }

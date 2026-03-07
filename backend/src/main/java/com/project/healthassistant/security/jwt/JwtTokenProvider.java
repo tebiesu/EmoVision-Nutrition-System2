@@ -10,6 +10,7 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Date;
+import java.util.UUID;
 
 @Component
 public class JwtTokenProvider {
@@ -27,6 +28,7 @@ public class JwtTokenProvider {
         Instant expiry = now.plusSeconds(jwtProperties.getExpirationSeconds());
 
         return Jwts.builder()
+                .id(UUID.randomUUID().toString())
                 .subject(String.valueOf(userId))
                 .claim("username", username)
                 .claim("roleCode", roleCode)
@@ -51,5 +53,9 @@ public class JwtTokenProvider {
         } catch (Exception ex) {
             return false;
         }
+    }
+
+    public String getTokenId(String token) {
+        return parseClaims(token).getId();
     }
 }

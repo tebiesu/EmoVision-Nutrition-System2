@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import MainLayout from '@/layout/MainLayout.vue'
+import { useAuthStore } from '@/stores/auth'
 
 const routes = [
   {
@@ -19,7 +20,7 @@ const routes = [
       { path: 'profile', component: () => import('@/views/profile/ProfilePage.vue') },
       { path: 'meals', component: () => import('@/views/meal/MealListPage.vue') },
       { path: 'analysis/trends', component: () => import('@/views/analysis/TrendPage.vue') },
-      { path: 'admin', component: () => import('@/views/admin/AdminDashboardPage.vue') }
+      { path: 'admin', component: () => import('@/views/admin/AdminDashboardPage.vue'), meta: { requiresAdmin: true } }
     ]
   }
 ]
@@ -29,16 +30,23 @@ const router = createRouter({
   routes
 })
 
-router.beforeEach((to) => {
-  const token = localStorage.getItem('health-assistant-token')
+router.beforeEach(async (to) => {
+  const authStore = useAuthStore()
   const authPages = ['/login', '/register']
 
-  if (!token && !authPages.includes(to.path)) {
+  if (!authStore.isAuthenticated && !authPages.includes(to.path)) {
     return '/login'
   }
 
-  if (token && authPages.includes(to.path)) {
+  if (authStore.isAuthenticated && authPages.includes(to.path)) {
     return '/dashboard'
+  }
+
+  if (authStore.isAuthenticated) {
+    await authStore.hydrateUser()
+    if (to.meta.requiresAdmin && !authStore.isAdmin) {
+      return '/dashboard'
+    }
   }
 
   return true

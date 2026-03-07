@@ -1,5 +1,7 @@
 package com.project.healthassistant.security.jwt;
 
+import com.project.healthassistant.common.security.AppUserPrincipal;
+import com.project.healthassistant.modules.auth.service.TokenBlacklistService;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -18,9 +20,11 @@ import java.util.List;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final TokenBlacklistService tokenBlacklistService;
 
-    public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider) {
+    public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider, TokenBlacklistService tokenBlacklistService) {
         this.jwtTokenProvider = jwtTokenProvider;
+        this.tokenBlacklistService = tokenBlacklistService;
     }
 
     @Override
@@ -31,13 +35,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String token = authorization.substring(7);
             if (jwtTokenProvider.validate(token)) {
                 Claims claims = jwtTokenProvider.parseClaims(token);
-                String roleCode = claims.get("roleCode", String.class);
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        claims.getSubject(),
-                        null,
-                        List.of(new SimpleGrantedAuthority("ROLE_" + roleCode))
-                );
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                String tokenId = claims.getId();
+                if (!tokenBlacklistService.isBlacklisted(tokenId)) {
+                    String roleCode = claims.get("roleCode", String.class);
+                    AppUserPrincipal principal = new AppUserPrincipal(
+                            Long.valueOf(claims.getSubject()),
+                            claims.get("username", String.class),
+                            roleCode
+                    );
+                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                            principal,
+                            null,
+                            List.of(new SimpleGrantedAuthority("ROLE_" + roleCode))
+                    );
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
             }
         }
         filterChain.doFilter(request, response);

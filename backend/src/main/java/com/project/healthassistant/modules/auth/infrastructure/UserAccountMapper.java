@@ -10,4 +10,7 @@ public interface UserAccountMapper extends BaseMapper<UserAccount> {
 
     @Select("SELECT * FROM user_account WHERE username = #{username} AND deleted = 0 LIMIT 1")
     UserAccount findByUsername(String username);
+
+    @Select("SELECT * FROM user_account WHERE id = #{id} AND deleted = 0 LIMIT 1")
+    UserAccount findActiveById(Long id);
 }
