@@ -27,6 +27,10 @@ public class FileController {
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<Map<String, Object>> upload(@RequestPart("file") MultipartFile file) {
-        return ApiResponse.success("upload success", fileStorageService.store(currentUserService.currentUserId(), file), TraceIdHolder.getTraceId());
+        return ApiResponse.success(
+                "上传成功",
+                fileStorageService.store(currentUserService.currentUserId(), file),
+                TraceIdHolder.getTraceId()
+        );
     }
 }

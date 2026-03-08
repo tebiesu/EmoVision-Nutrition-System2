@@ -31,12 +31,12 @@ public class AuthController {
     @PostMapping("/register")
     public ApiResponse<Map<String, Long>> register(@Valid @RequestBody RegisterRequest request) {
         Long userId = authApplicationService.register(request);
-        return ApiResponse.success("register success", Map.of("userId", userId), TraceIdHolder.getTraceId());
+        return ApiResponse.success("注册成功", Map.of("userId", userId), TraceIdHolder.getTraceId());
     }
 
     @PostMapping("/login")
     public ApiResponse<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
-        return ApiResponse.success("login success", authApplicationService.login(request), TraceIdHolder.getTraceId());
+        return ApiResponse.success("登录成功", authApplicationService.login(request), TraceIdHolder.getTraceId());
     }
 
     @GetMapping("/me")
@@ -49,6 +49,6 @@ public class AuthController {
     public ApiResponse<Void> logout(Authentication authentication, @RequestHeader("Authorization") String authorization) {
         AppUserPrincipal principal = (AppUserPrincipal) authentication.getPrincipal();
         authApplicationService.logout(principal.userId(), authorization.substring(7));
-        return ApiResponse.success("logout success", null, TraceIdHolder.getTraceId());
+        return ApiResponse.success("退出登录成功", null, TraceIdHolder.getTraceId());
     }
 }

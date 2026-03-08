@@ -3,16 +3,16 @@
     <div class="auth-card glass-card">
       <section class="auth-hero">
         <div>
-          <div class="page-eyebrow">Natural Healing UI</div>
+          <div class="page-eyebrow">自然治愈界面</div>
           <h1>回到你的饮食与情绪节律</h1>
-          <p>从每一餐、每一个情绪片段，构建可解释的健康闭环。</p>
+          <p>从每一餐、每一次情绪记录中，构建可解释的个人健康闭环。</p>
         </div>
         <div>
           <div class="badge-chip">识别 / 评估 / 建议 / 趋势</div>
         </div>
       </section>
       <section class="auth-panel">
-        <div class="page-eyebrow">Sign In</div>
+        <div class="page-eyebrow">登录入口</div>
         <h2>登录系统</h2>
         <el-form :model="form" label-position="top" @submit.prevent="handleSubmit">
           <el-form-item label="用户名">

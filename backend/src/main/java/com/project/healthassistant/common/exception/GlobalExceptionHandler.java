@@ -10,6 +10,7 @@ import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -19,9 +20,23 @@ public class GlobalExceptionHandler {
         return ApiResponse.failure(ex.getCode(), ex.getMessage(), TraceIdHolder.getTraceId());
     }
 
-    @ExceptionHandler({MethodArgumentNotValidException.class, BindException.class, ConstraintViolationException.class, HttpMessageNotReadableException.class})
+    @ExceptionHandler({
+            MethodArgumentNotValidException.class,
+            BindException.class,
+            ConstraintViolationException.class,
+            HttpMessageNotReadableException.class
+    })
     public ApiResponse<Void> handleValidationException(Exception ex) {
         return ApiResponse.failure(ResultCode.INVALID_PARAM.getCode(), ex.getMessage(), TraceIdHolder.getTraceId());
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ApiResponse<Void> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException ex) {
+        return ApiResponse.failure(
+                ResultCode.INVALID_PARAM.getCode(),
+                "上传图片超过大小限制，请压缩后重试",
+                TraceIdHolder.getTraceId()
+        );
     }
 
     @ExceptionHandler(AccessDeniedException.class)

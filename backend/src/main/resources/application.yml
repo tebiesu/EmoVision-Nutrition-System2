@@ -5,7 +5,7 @@ spring:
   application:
     name: health-assistant-backend
   profiles:
-    active: dev
+    active: ${SPRING_PROFILES_ACTIVE:dev}
   jackson:
     time-zone: Asia/Shanghai
     date-format: yyyy-MM-dd HH:mm:ss
@@ -15,6 +15,11 @@ spring:
   mvc:
     problemdetails:
       enabled: false
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
 
 management:
   endpoints:
@@ -37,6 +42,18 @@ app:
     secret: ${JWT_SECRET:change-me-to-a-very-long-secret-key-for-jwt-token}
     expiration-seconds: ${JWT_EXPIRATION_SECONDS:7200}
   upload:
-    max-size-bytes: ${UPLOAD_MAX_SIZE_BYTES:5242880}
+    max-size-bytes: ${UPLOAD_MAX_SIZE_BYTES:10485760}
     allowed-types: image/jpeg,image/png,image/webp
     base-dir: ${UPLOAD_BASE_DIR:uploads}
+  ai:
+    enabled: ${AI_ENABLED:false}
+    channel-name: ${AI_CHANNEL_NAME:new-api}
+    base-url: ${AI_BASE_URL:}
+    api-key: ${AI_API_KEY:}
+    timeout-seconds: ${AI_TIMEOUT_SECONDS:40}
+    chat:
+      model: ${AI_CHAT_MODEL:gpt-4o-mini}
+      system-prompt: ${AI_CHAT_SYSTEM_PROMPT:你是系统内置的营养助手，请始终使用简体中文，从饮食结构、情绪状态、下一餐建议、风险提醒四个角度回答。}
+    vision:
+      model: ${AI_VISION_MODEL:gpt-4.1-mini}
+      system-prompt: ${AI_VISION_SYSTEM_PROMPT:你是食物识别与营养估算助手，请输出 foods JSON 数组，并包含 foodName amount unit calories protein fat carbs confidence reason。}

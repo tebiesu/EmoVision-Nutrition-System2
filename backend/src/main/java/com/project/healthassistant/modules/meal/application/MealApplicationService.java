@@ -2,11 +2,20 @@ package com.project.healthassistant.modules.meal.application;
 
 import com.project.healthassistant.common.api.ResultCode;
 import com.project.healthassistant.common.exception.BusinessException;
-import com.project.healthassistant.modules.meal.domain.*;
-import com.project.healthassistant.modules.meal.infrastructure.*;
+import com.project.healthassistant.modules.meal.domain.DailyHealthSummary;
+import com.project.healthassistant.modules.meal.domain.EmotionRecord;
+import com.project.healthassistant.modules.meal.domain.MealItem;
+import com.project.healthassistant.modules.meal.domain.MealRecord;
+import com.project.healthassistant.modules.meal.domain.NutritionAssessment;
+import com.project.healthassistant.modules.meal.domain.RecommendationRecord;
+import com.project.healthassistant.modules.meal.infrastructure.DailyHealthSummaryMapper;
+import com.project.healthassistant.modules.meal.infrastructure.EmotionRecordMapper;
+import com.project.healthassistant.modules.meal.infrastructure.MealItemMapper;
+import com.project.healthassistant.modules.meal.infrastructure.MealRecordMapper;
+import com.project.healthassistant.modules.meal.infrastructure.NutritionAssessmentMapper;
+import com.project.healthassistant.modules.meal.infrastructure.RecommendationRecordMapper;
 import com.project.healthassistant.modules.profile.application.ProfileApplicationService;
 import com.project.healthassistant.modules.profile.domain.UserProfile;
-import com.project.healthassistant.modules.vision.domain.VisionRecognitionCandidate;
 import com.project.healthassistant.modules.vision.infrastructure.VisionRecognitionCandidateMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -74,7 +83,7 @@ public class MealApplicationService {
                     .collect(Collectors.toList());
         }
         if (itemCommands.isEmpty()) {
-            throw new BusinessException(ResultCode.INVALID_PARAM.getCode(), "Meal items are required");
+            throw new BusinessException(ResultCode.INVALID_PARAM.getCode(), "\u8bf7\u81f3\u5c11\u5f55\u5165\u4e00\u79cd\u98df\u7269");
         }
 
         List<MealItem> savedItems = new ArrayList<>();
@@ -142,23 +151,23 @@ public class MealApplicationService {
         List<String> riskTags = new ArrayList<>();
         if (totalCalories.compareTo(BigDecimal.valueOf(850)) > 0) {
             penalty += 25;
-            riskTags.add("HIGH_CALORIE");
+            riskTags.add("\u70ed\u91cf\u504f\u9ad8");
         }
         if (totalProtein.compareTo(BigDecimal.valueOf(20)) < 0) {
             penalty += 15;
-            riskTags.add("LOW_PROTEIN");
+            riskTags.add("\u86cb\u767d\u8d28\u4e0d\u8db3");
         }
         if (totalFat.compareTo(BigDecimal.valueOf(35)) > 0) {
             penalty += 15;
-            riskTags.add("HIGH_FAT");
+            riskTags.add("\u8102\u80aa\u504f\u9ad8");
         }
         if (totalCarbs.compareTo(BigDecimal.valueOf(90)) > 0) {
             penalty += 15;
-            riskTags.add("HIGH_CARB");
+            riskTags.add("\u78b3\u6c34\u504f\u9ad8");
         }
         if (profile.getGoal() != null && profile.getGoal().toLowerCase().contains("loss") && totalCalories.compareTo(BigDecimal.valueOf(700)) > 0) {
             penalty += 10;
-            riskTags.add("GOAL_MISMATCH");
+            riskTags.add("\u4e0e\u51cf\u8102\u76ee\u6807\u4e0d\u7b26");
         }
 
         NutritionAssessment assessment = new NutritionAssessment();
@@ -170,7 +179,7 @@ public class MealApplicationService {
         assessment.setStructureScore(BigDecimal.valueOf(Math.max(30, 100 - penalty)).setScale(2, RoundingMode.HALF_UP));
         assessment.setRiskLevel(penalty >= 35 ? "HIGH" : penalty >= 20 ? "MEDIUM" : "LOW");
         assessment.setRiskTags(String.join(",", riskTags));
-        assessment.setEvidenceText(String.format("Calories=%s, Protein=%s, Fat=%s, Carbs=%s", totalCalories, totalProtein, totalFat, totalCarbs));
+        assessment.setEvidenceText(String.format("\u70ed\u91cf=%s\uff0c\u86cb\u767d\u8d28=%s\uff0c\u8102\u80aa=%s\uff0c\u78b3\u6c34=%s", totalCalories, totalProtein, totalFat, totalCarbs));
         assessment.setCreatedAt(LocalDateTime.now());
         return assessment;
     }
@@ -179,22 +188,27 @@ public class MealApplicationService {
                                                      UserProfile profile, String emotionText) {
         boolean forceFallback = emotionText != null && emotionText.toLowerCase().contains("fallback-ai");
         String summary = switch (assessment.getRiskLevel()) {
-            case "HIGH" -> "This meal needs immediate adjustment";
-            case "MEDIUM" -> "This meal is acceptable but can be improved";
-            default -> "This meal is balanced overall";
+            case "HIGH" -> "\u8fd9\u9910\u9700\u8981\u5c3d\u5feb\u8c03\u6574";
+            case "MEDIUM" -> "\u8fd9\u9910\u6574\u4f53\u5c1a\u53ef\uff0c\u4f46\u8fd8\u6709\u4f18\u5316\u7a7a\u95f4";
+            default -> "\u8fd9\u9910\u6574\u4f53\u6bd4\u8f83\u5747\u8861";
         };
         String recommendationText;
         int aiEnhanced;
         int fallbackMode;
+        String goalLabel = switch (profile.getGoal()) {
+            case "fat-loss" -> "\u51cf\u8102";
+            case "muscle-gain" -> "\u589e\u808c";
+            default -> "\u7ef4\u6301\u72b6\u6001";
+        };
         if (forceFallback) {
             aiEnhanced = 0;
             fallbackMode = 1;
-            recommendationText = summary + ". Focus on lighter cooking, more vegetables, and sufficient hydration.";
+            recommendationText = summary + "\u3002\u5efa\u8bae\u51cf\u5c11\u6cb9\u70b8\u548c\u9ad8\u7cd6\u642d\u914d\uff0c\u8865\u5145\u852c\u83dc\uff0c\u5e76\u6ce8\u610f\u996e\u6c34\u3002";
         } else {
             aiEnhanced = 1;
             fallbackMode = 0;
-            recommendationText = summary + ". Based on your " + profile.getGoal() + " goal and current mood of " + emotionOutcome.label()
-                    + ", consider pairing the next meal with high-fiber vegetables and lean protein.";
+            recommendationText = summary + "\u3002\u7ed3\u5408\u4f60\u5f53\u524d\u7684" + goalLabel + "\u76ee\u6807\u548c" + emotionOutcome.label()
+                    + "\u72b6\u6001\uff0c\u4e0b\u4e00\u9910\u53ef\u4f18\u5148\u642d\u914d\u9ad8\u7ea4\u7ef4\u852c\u83dc\u4e0e\u4f18\u8d28\u86cb\u767d\u3002";
         }
         RecommendationRecord record = new RecommendationRecord();
         record.setMealRecordId(mealRecordId);
@@ -208,16 +222,16 @@ public class MealApplicationService {
 
     private EmotionOutcome analyzeEmotion(Integer selfRating, String emotionText) {
         if (emotionText != null && emotionText.toLowerCase().contains("timeout-emotion")) {
-            return new EmotionOutcome("SELF_REPORTED", BigDecimal.valueOf(selfRating));
+            return new EmotionOutcome("\u4ee5\u81ea\u8bc4\u4e3a\u51c6", BigDecimal.valueOf(selfRating));
         }
         String lower = emotionText == null ? "" : emotionText.toLowerCase();
-        if (lower.contains("stress") || lower.contains("sad") || lower.contains("anxious")) {
-            return new EmotionOutcome("NEGATIVE", BigDecimal.valueOf(Math.max(1, selfRating - 1)));
+        if (lower.contains("stress") || lower.contains("sad") || lower.contains("anxious") || lower.contains("\u538b\u529b") || lower.contains("\u96be\u8fc7") || lower.contains("\u7126\u8651")) {
+            return new EmotionOutcome("\u60c5\u7eea\u504f\u4f4e", BigDecimal.valueOf(Math.max(1, selfRating - 1)));
         }
-        if (lower.contains("happy") || lower.contains("calm") || lower.contains("relaxed")) {
-            return new EmotionOutcome("POSITIVE", BigDecimal.valueOf(Math.min(5, selfRating + 0.5)));
+        if (lower.contains("happy") || lower.contains("calm") || lower.contains("relaxed") || lower.contains("\u5f00\u5fc3") || lower.contains("\u5e73\u9759") || lower.contains("\u653e\u677e")) {
+            return new EmotionOutcome("\u60c5\u7eea\u7a33\u5b9a", BigDecimal.valueOf(Math.min(5, selfRating + 0.5)));
         }
-        return new EmotionOutcome("NEUTRAL", BigDecimal.valueOf(selfRating));
+        return new EmotionOutcome("\u60c5\u7eea\u4e2d\u6027", BigDecimal.valueOf(selfRating));
     }
 
     private void refreshDailySummary(Long userId, LocalDate date) {
@@ -241,7 +255,7 @@ public class MealApplicationService {
         }
         summary.setTotalCalories(totalCalories);
         summary.setAvgEmotionScore(avgEmotion);
-        summary.setSummaryText("Today you consumed " + totalCalories + " kcal with mood score " + avgEmotion + ".");
+        summary.setSummaryText("\u4eca\u65e5\u7d2f\u8ba1\u6444\u5165 " + totalCalories + " \u5343\u5361\uff0c\u5e73\u5747\u60c5\u7eea\u5206\u4e3a " + avgEmotion + "\u3002");
         summary.setUpdatedAt(LocalDateTime.now());
         if (summary.getId() == null) {
             dailyHealthSummaryMapper.insert(summary);

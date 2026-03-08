@@ -44,7 +44,7 @@ public class MealController {
                 request.mealType(), request.eatenAt(), request.description(), request.imageUrl(), request.recognitionTaskId(),
                 request.selfRating(), request.emotionText(), items
         );
-        return ApiResponse.success("meal created", mealApplicationService.createMeal(currentUserService.currentUserId(), command), TraceIdHolder.getTraceId());
+        return ApiResponse.success("餐次创建成功", mealApplicationService.createMeal(currentUserService.currentUserId(), command), TraceIdHolder.getTraceId());
     }
 
     @GetMapping

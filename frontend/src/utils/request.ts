@@ -5,7 +5,7 @@ import { useAuthStore } from '@/stores/auth'
 
 const request = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '/api/v1',
-  timeout: 15000
+  timeout: 20000
 })
 
 request.interceptors.request.use((config) => {
@@ -17,16 +17,16 @@ request.interceptors.request.use((config) => {
 })
 
 request.interceptors.response.use(
-  ((response: any) => {
-    const payload = response.data as ApiEnvelope<unknown>
+  ((response: { data: ApiEnvelope<unknown> }) => {
+    const payload = response.data
     if (payload.code !== 0) {
       ElMessage.error(payload.message)
       return Promise.reject(new Error(payload.message))
     }
     return payload.data
-  }) as any,
+  }) as never,
   (error) => {
-    ElMessage.error(error.response?.data?.message || error.message || 'Request failed')
+    ElMessage.error(error.response?.data?.message || error.message || '请求失败，请稍后重试')
     if (error.response?.status === 401) {
       useAuthStore().clearAuth()
     }

@@ -5,7 +5,6 @@ import com.project.healthassistant.common.security.CurrentUserService;
 import com.project.healthassistant.common.trace.TraceIdHolder;
 import com.project.healthassistant.modules.vision.service.VisionRecognitionService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,16 +30,21 @@ public class VisionController {
 
     @PostMapping("/tasks")
     public ApiResponse<Map<String, Object>> createTask(@Valid @RequestBody VisionTaskRequest request) {
-        return ApiResponse.success("vision task created",
+        return ApiResponse.success(
+                "识别任务已创建",
                 visionRecognitionService.createTask(currentUserService.currentUserId(), request.imageUrl(), request.description()),
-                TraceIdHolder.getTraceId());
+                TraceIdHolder.getTraceId()
+        );
     }
 
     @GetMapping("/tasks/{taskId}")
     public ApiResponse<Map<String, Object>> getTask(@PathVariable Long taskId) {
-        return ApiResponse.success(visionRecognitionService.getTask(taskId), TraceIdHolder.getTraceId());
+        return ApiResponse.success(
+                visionRecognitionService.getTask(currentUserService.currentUserId(), taskId),
+                TraceIdHolder.getTraceId()
+        );
     }
 
-    public record VisionTaskRequest(String imageUrl, @NotBlank String description) {
+    public record VisionTaskRequest(String imageUrl, String description) {
     }
 }

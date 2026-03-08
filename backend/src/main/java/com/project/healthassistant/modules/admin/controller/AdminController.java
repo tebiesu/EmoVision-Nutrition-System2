@@ -29,4 +29,9 @@ public class AdminController {
     public ApiResponse<List<Map<String, Object>>> auditLogs() {
         return ApiResponse.success(adminQueryService.logs(), TraceIdHolder.getTraceId());
     }
+
+    @GetMapping("/ai-config")
+    public ApiResponse<Map<String, Object>> aiConfig() {
+        return ApiResponse.success(adminQueryService.aiConfig(), TraceIdHolder.getTraceId());
+    }
 }

@@ -35,7 +35,8 @@ public class FileStorageService {
             Path baseDir = Paths.get(uploadProperties.getBaseDir());
             Files.createDirectories(baseDir);
             String extension = file.getOriginalFilename() != null && file.getOriginalFilename().contains(".")
-                    ? file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf('.')) : ".bin";
+                    ? file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf('.'))
+                    : ".bin";
             String fileName = UUID.randomUUID() + extension;
             Path target = baseDir.resolve(fileName);
             Files.copy(file.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
@@ -56,19 +57,19 @@ public class FileStorageService {
             result.put("sizeBytes", record.getSizeBytes());
             return result;
         } catch (IOException ex) {
-            throw new BusinessException(ResultCode.SYSTEM_ERROR);
+            throw new BusinessException(ResultCode.SYSTEM_ERROR.getCode(), "文件保存失败，请稍后重试");
         }
     }
 
     private void validate(MultipartFile file) {
         if (file == null || file.isEmpty()) {
-            throw new BusinessException(ResultCode.INVALID_PARAM.getCode(), "File is required");
+            throw new BusinessException(ResultCode.INVALID_PARAM.getCode(), "请选择需要上传的图片");
         }
         if (!uploadProperties.getAllowedTypes().contains(file.getContentType())) {
-            throw new BusinessException(ResultCode.INVALID_PARAM.getCode(), "Unsupported file type");
+            throw new BusinessException(ResultCode.INVALID_PARAM.getCode(), "仅支持 JPG、PNG、WebP 图片");
         }
         if (file.getSize() > uploadProperties.getMaxSizeBytes()) {
-            throw new BusinessException(ResultCode.INVALID_PARAM.getCode(), "File too large");
+            throw new BusinessException(ResultCode.INVALID_PARAM.getCode(), "图片过大，请压缩到 10MB 以内后重试");
         }
     }
 }

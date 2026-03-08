@@ -20,6 +20,7 @@ const routes = [
       { path: 'profile', component: () => import('@/views/profile/ProfilePage.vue') },
       { path: 'meals', component: () => import('@/views/meal/MealListPage.vue') },
       { path: 'analysis/trends', component: () => import('@/views/analysis/TrendPage.vue') },
+      { path: 'assistant', component: () => import('@/views/assistant/NutritionAssistantPage.vue') },
       { path: 'admin', component: () => import('@/views/admin/AdminDashboardPage.vue'), meta: { requiresAdmin: true } }
     ]
   }

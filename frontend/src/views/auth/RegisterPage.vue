@@ -3,13 +3,13 @@
     <div class="auth-card glass-card">
       <section class="auth-hero">
         <div>
-          <div class="page-eyebrow">Create Account</div>
+          <div class="page-eyebrow">创建账号</div>
           <h1>创建你的健康画像</h1>
           <p>注册后即可开始维护档案、记录餐次、识别食物并跟踪趋势。</p>
         </div>
       </section>
       <section class="auth-panel">
-        <div class="page-eyebrow">Sign Up</div>
+        <div class="page-eyebrow">注册入口</div>
         <h2>注册账号</h2>
         <el-form :model="form" label-position="top">
           <el-form-item label="用户名"><el-input v-model="form.username" /></el-form-item>

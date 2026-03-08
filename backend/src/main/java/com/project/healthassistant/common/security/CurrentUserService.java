@@ -11,10 +11,18 @@ public class CurrentUserService {
 
     public Long currentUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || authentication.getName() == null) {
+        if (authentication == null || authentication.getPrincipal() == null) {
             throw new BusinessException(ResultCode.UNAUTHORIZED);
         }
-        return Long.parseLong(authentication.getName());
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof AppUserPrincipal user) {
+            return user.userId();
+        }
+        try {
+            return Long.parseLong(authentication.getName());
+        } catch (NumberFormatException ex) {
+            throw new BusinessException(ResultCode.UNAUTHORIZED);
+        }
     }
 
     public String currentUsername() {

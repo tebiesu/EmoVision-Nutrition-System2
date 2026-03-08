@@ -25,7 +25,7 @@ public class DashboardQueryService {
         result.put("todayMealCount", meals.size());
         result.put("latestMeal", latestMeal);
         result.put("dailySummary", dailySummary == null ? Map.of(
-                "summaryText", "No meal recorded today",
+                "summaryText", "今天还没有记录餐次",
                 "totalCalories", 0,
                 "avgEmotionScore", 0
         ) : Map.of(

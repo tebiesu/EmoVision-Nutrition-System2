@@ -38,7 +38,7 @@ public class ProfileController {
 
     @PutMapping
     public ApiResponse<Map<String, Object>> saveProfile(@RequestBody @Validated ProfileRequest request) {
-        return ApiResponse.success("profile saved",
+        return ApiResponse.success("档案保存成功",
                 profileApplicationService.save(currentUserService.currentUserId(), new ProfileApplicationService.ProfileCommand(
                         request.age(), request.gender(), request.heightCm(), request.weightKg(), request.activityLevel(),
                         request.goal(), request.allergies(), request.tabooFoods(), request.medicalConditions()

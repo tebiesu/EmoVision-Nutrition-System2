@@ -35,6 +35,11 @@ body {
     linear-gradient(180deg, #fbf8f3 0%, #f5f4ee 50%, #edf3ea 100%);
 }
 
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
 button,
 input,
 textarea,
@@ -135,6 +140,19 @@ select {
   background: rgba(255, 255, 255, 0.65);
   color: var(--color-primary-deep);
   border: 1px solid var(--color-border);
+}
+
+.badge-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(125, 164, 130, 0.16);
+  color: var(--color-primary-deep);
+  font-size: 12px;
+  letter-spacing: 0.08em;
 }
 
 .table-like {
